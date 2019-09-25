@@ -62,7 +62,7 @@ while iwp ~= 0
     
     % compute true data
     [G,iwp]= compute_steering(xtrue, wp, iwp, AT_WAYPOINT, G, RATEG, MAXG, dt);
-    if iwp==0 & NUMBER_LOOPS > 1, iwp=1; NUMBER_LOOPS= NUMBER_LOOPS-1; end % perform loops: if final waypoint reached, go back to first
+    if iwp==0 && NUMBER_LOOPS > 1, iwp=1; NUMBER_LOOPS= NUMBER_LOOPS-1; end % perform loops: if final waypoint reached, go back to first
     xtrue= vehicle_model(xtrue, V,G, WHEELBASE,dt);
     [Vn,Gn]= add_control_noise(V,G,Q, SWITCH_CONTROL_NOISE);
     
@@ -88,7 +88,7 @@ while iwp ~= 0
         if SWITCH_USE_IEKF == 1
             [x,P]= update_iekf(x,P,zf,RE,idf, 5);
         else
-            [x,P]= update(x,P,zf,RE,idf, SWITCH_BATCH_UPDATE); 
+            [x,P]= update_D(x,P,zf,RE,idf, SWITCH_BATCH_UPDATE); 
         end
         [x,P]= augment(x,P, zn,RE); 
     end
@@ -97,8 +97,8 @@ while iwp ~= 0
     data= store_data(data, x, P, xtrue);
     
     % plots
-    xt= transformtoglobal(veh,xtrue);
-    xv= transformtoglobal(veh,x(1:3));
+    xt= TransformToGlobal(veh,xtrue);
+    xv= TransformToGlobal(veh,x(1:3));
     set(h.xt, 'xdata', xt(1,:), 'ydata', xt(2,:))
     set(h.xv, 'xdata', xv(1,:), 'ydata', xv(2,:))
     set(h.xf, 'xdata', x(4:2:end), 'ydata', x(5:2:end))
@@ -143,7 +143,7 @@ if isempty(rb), p=[]; return, end
 len= size(rb,2);
 lnes(1,:)= zeros(1,len)+ xv(1);
 lnes(2,:)= zeros(1,len)+ xv(2);
-lnes(3:4,:)= transformtoglobal([rb(1,:).*cos(rb(2,:)); rb(1,:).*sin(rb(2,:))], xv);
+lnes(3:4,:)= TransformToGlobal([rb(1,:).*cos(rb(2,:)); rb(1,:).*sin(rb(2,:))], xv);
 p= line_plot_conversion (lnes);
 
 %
